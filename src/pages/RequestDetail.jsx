@@ -11,6 +11,9 @@ export default function RequestDetail() {
   const [loading, setLoading] = useState(true)
   const [body, setBody] = useState('')
   const [posting, setPosting] = useState(false)
+  const [matching, setMatching] = useState(false)
+  const [matches, setMatches] = useState(null)
+  const [matchError, setMatchError] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -32,6 +35,23 @@ export default function RequestDetail() {
   useEffect(() => {
     load()
   }, [id])
+
+  async function handleFindMatches() {
+    setMatching(true)
+    setMatchError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('match-experts', {
+        body: { requestId: id },
+      })
+      if (error) throw error
+      setMatches(data.matches || [])
+    } catch (err) {
+      console.error('Matching failed', err)
+      setMatchError('Could not find matches right now.')
+    } finally {
+      setMatching(false)
+    }
+  }
 
   async function handleRespond(e) {
     e.preventDefault()
@@ -74,6 +94,37 @@ export default function RequestDetail() {
           Asked by {request.profiles?.name || 'a founder'}
         </p>
       </div>
+
+      {profile?.id === request.founder_id && (
+        <div className="mb-10 border border-line rounded-xl p-6 bg-paper-raised">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-medium">Best-fit experts</p>
+            <button
+              type="button"
+              onClick={handleFindMatches}
+              disabled={matching}
+              className="text-sm border border-line px-4 py-1.5 rounded-full hover:bg-paper-soft transition-colors disabled:opacity-50"
+            >
+              {matching ? 'Matching…' : matches ? 'Refresh' : 'Find matching experts'}
+            </button>
+          </div>
+          {matchError && <p className="text-sm text-ask-deep">{matchError}</p>}
+          {matches && matches.length === 0 && (
+            <p className="text-sm text-ink-soft">No strong matches yet — more experts need to sign up.</p>
+          )}
+          {matches && matches.length > 0 && (
+            <ul className="space-y-3 mt-3">
+              {matches.map((m) => (
+                <li key={m.id} className="text-sm">
+                  <span className="font-medium">{m.name}</span>
+                  <span className="text-ink-soft"> — {m.focus_area}</span>
+                  <p className="text-ink-soft mt-0.5">{m.reason}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <h2 className="font-display text-xl mb-5">
         {responses.length === 0

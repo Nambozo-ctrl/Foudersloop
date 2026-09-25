@@ -9,6 +9,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('founder')
+  const [focusArea, setFocusArea] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -16,7 +17,7 @@ export default function SignUp() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const { error } = await signUp({ email, password, name, role })
+    const { error } = await signUp({ email, password, name, role, focusArea })
     setLoading(false)
     if (error) {
       setError(error.message)
@@ -88,6 +89,28 @@ export default function SignUp() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper-raised focus:outline-none focus:ring-2 focus:ring-ask"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5">
+            {role === 'expert' ? 'Your area of expertise' : 'What do you want feedback on?'}
+          </label>
+          <input
+            type="text"
+            required
+            value={focusArea}
+            onChange={(e) => setFocusArea(e.target.value)}
+            placeholder={
+              role === 'expert'
+                ? 'e.g. B2B pricing, early hiring, seed fundraising'
+                : 'e.g. pricing my SaaS product, first sales hires'
+            }
+            className="w-full border border-line rounded-lg px-4 py-2.5 bg-paper-raised focus:outline-none focus:ring-2 focus:ring-ask"
+          />
+          <p className="text-xs text-ink-soft mt-1.5">
+            {role === 'expert'
+              ? "We'll use this to match you with relevant questions."
+              : "We'll use this to help match you with the right expert."}
+          </p>
         </div>
 
         {error && <p className="text-sm text-ask-deep">{error}</p>}

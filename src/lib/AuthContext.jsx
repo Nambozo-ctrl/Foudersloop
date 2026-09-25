@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  async function signUp({ email, password, name, role }) {
+  async function signUp({ email, password, name, role, focusArea }) {
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) return { error }
     if (data.user) {
@@ -44,6 +44,7 @@ export function AuthProvider({ children }) {
         id: data.user.id,
         name,
         role,
+        focus_area: focusArea || null,
       })
       if (profileError) return { error: profileError }
       await loadProfile(data.user.id)
