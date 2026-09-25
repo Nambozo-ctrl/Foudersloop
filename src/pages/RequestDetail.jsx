@@ -11,7 +11,6 @@ export default function RequestDetail() {
   const [loading, setLoading] = useState(true)
   const [body, setBody] = useState('')
   const [posting, setPosting] = useState(false)
-  const [drafting, setDrafting] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -33,24 +32,6 @@ export default function RequestDetail() {
   useEffect(() => {
     load()
   }, [id])
-
-  async function handleGenerateDraft() {
-    setDrafting(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('draft-response', {
-        body: {
-          title: request.title,
-          detail: request.details,
-        },
-      })
-      if (error) throw error
-      setBody(data.draft || '')
-    } catch (err) {
-      console.error('Draft generation failed', err)
-    } finally {
-      setDrafting(false)
-    }
-  }
 
   async function handleRespond(e) {
     e.preventDefault()
@@ -123,23 +104,13 @@ export default function RequestDetail() {
             onChange={(e) => setBody(e.target.value)}
             className="w-full border border-line rounded-lg px-4 py-2.5 mb-4 focus:outline-none focus:ring-2 focus:ring-answer"
           />
-          <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={posting}
-              className="bg-answer text-paper px-5 py-2.5 rounded-full font-medium hover:bg-answer-deep transition-colors disabled:opacity-50"
-            >
-              {posting ? 'Posting…' : 'Post answer'}
-            </button>
-            <button
-              type="button"
-              onClick={handleGenerateDraft}
-              disabled={drafting}
-              className="border border-line px-5 py-2.5 rounded-full font-medium hover:bg-paper-soft transition-colors disabled:opacity-50"
-            >
-              {drafting ? 'Drafting…' : 'Generate draft'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={posting}
+            className="bg-answer text-paper px-5 py-2.5 rounded-full font-medium hover:bg-answer-deep transition-colors disabled:opacity-50"
+          >
+            {posting ? 'Posting…' : 'Post answer'}
+          </button>
         </form>
       )}
     </div>
